@@ -1,0 +1,59 @@
+#pragma kernel CSMain
+
+RWTexture2D<float4> Read;
+RWTexture2D<float4> Write;
+
+[numthreads(28, 33, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float4 col = Read[id.xy];
+
+    
+    if (col.x == 0.0 && col.y == 0.0 && col.z == 0.0) {
+        return;
+    }
+    else if (col.z == 1.0) { // head
+        Write[id.xy] = float4(1.0, 0.0, 0.0, 1.0);
+        return;
+    }
+    else if (col.y == 0.0) { // tail
+        Write[id.xy] = float4(1.0, 1.0, 0.0, 1.0);
+        return;
+    }
+    else{ // wire
+
+        int nHeads = 0;
+
+        col = Read[id.xy + uint2(1, 0)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(-1, 0)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(0, 1)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(0, -1)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(1, 1)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(1, -1)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(-1, 1)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+        col = Read[id.xy + uint2(-1, -1)];
+        if (col.x == 0.0 && col.y == 0.0 && col.z == 1.0) nHeads++;
+
+
+        if (nHeads == 1 || nHeads == 2)
+            Write[id.xy] = float4(0.0, 0.0, 1.0, 1.0);
+        else
+            Write[id.xy] = float4(1.0, 1.0, 0.0, 1.0);
+
+        return;
+    }
+}
